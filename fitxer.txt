@@ -1,3 +1,0 @@
-modificat master
-modificat branch1
-fitxer.txt
