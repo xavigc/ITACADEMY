@@ -1,5 +1,5 @@
 -- ****************** Nivell 1 **************************
-
+USE transacrions;
 -- Exercici 1
 -- La teva tasca és dissenyar i crear una taula anomenada "credit_card" que emmagatzemi detalls crucials sobre les targetes de crèdit. 
 -- La nova taula ha de ser capaç d'identificar de manera única cada targeta i establir una relació adequada amb les altres dues taules ("transaction" i "company").
@@ -51,12 +51,61 @@ DESC credit_card;
 -- ****************** Nivell 2 **************************
 -- Exercici 1
 -- Elimina de la taula transaction el registre amb ID 000447FE-B650-4DCF-85DE-C7ED0EE1CAAD de la base de dades.
-
-
+SELECT * FROM  transaction WHERE id='000447FE-B650-4DCF-85DE-C7ED0EE1CAAD';
+DELETE FROM transaction WHERE id='000447FE-B650-4DCF-85DE-C7ED0EE1CAAD';
+SELECT * FROM  transaction WHERE id='000447FE-B650-4DCF-85DE-C7ED0EE1CAAD';
 -- Exercici 2
--- La secció de màrqueting desitja tenir accés a informació específica per a realitzar anàlisi i estratègies efectives. S'ha sol·licitat crear una vista que proporcioni detalls clau sobre les companyies i les seves transaccions. Serà necessària que creïs una vista anomenada VistaMarketing que contingui la següent informació: Nom de la companyia. Telèfon de contacte. País de residència. Mitjana de compra realitzat per cada companyia. Presenta la vista creada, ordenant les dades de major a menor mitjana de compra.
+-- La secció de màrqueting desitja tenir accés a informació específica per a realitzar anàlisi i estratègies efectives. 
+-- S'ha sol·licitat crear una vista que proporcioni detalls clau sobre les companyies i les seves transaccions. 
+-- Serà necessària que creïs una vista anomenada VistaMarketing que contingui la següent informació: 
+-- Nom de la companyia. Telèfon de contacte. País de residència. Mitjana de compra realitzat per cada companyia.
+--  Presenta la vista creada, ordenant les dades de major a menor mitjana de compra.
+CREATE OR REPLACE VIEW VistaMarketing AS (
+											SELECT company_name, phone, country, AVG(amount) AS mitjana_compra
+											FROM company c, transaction t
+											WHERE c.id = t.company_id
+											GROUP BY company_name, phone, country
+											ORDER BY AVG(amount) DESC
+										  );
 
+SELECT * FROM VistaMarketing ORDER BY mitjana_compra DESC;
 
 -- Exercici 3
 -- Filtra la vista VistaMarketing per a mostrar només les companyies que tenen el seu país de residència en "Germany"
+
+SELECT * FROM VistaMarketing WHERE country = "Germany";
+
 -- ****************** Nivell 3 **************************
+
+-- Exercici 1
+-- La setmana vinent tindràs una nova reunió amb els gerents de màrqueting. Un company del teu equip va realitzar modificacions en la base de dades, però no recorda com les va realitzar. 
+-- Et demana que l'ajudis a deixar els comandos executats per a obtenir el següent diagrama:
+
+-- En aquesta activitat, és necessari que descriguis el "pas a pas" de les tasques realitzades. És important realitzar descripcions senzilles, simples i fàcils de comprendre. Per a realitzar aquesta activitat hauràs de treballar amb els arxius denominats "estructura_dades_user" i "dades_introduir_user"
+-- Recorda continuar treballant sobre el model i les taules amb les quals ja has treballat fins ara.
+
+ALTER TABLE credit_card 
+ADD fecha_actual DATE DEFAULT (CURRENT_DATE);
+
+DESC user;
+ALTER TABLE user
+RENAME COLUMN email TO personal_email;
+
+DESC transaction; 
+ALTER TABLE transaction
+MODIFY COLUMN user_id CHAR(10);
+ALTER TABLE transaction
+ADD FOREIGN KEY (user_id) REFERENCES user(id) ;
+
+ 
+-- Exercici 2
+-- L'empresa també us demana crear una vista anomenada "InformeTecnico" que contingui la següent informació:
+
+CREATE OR REPLACE VIEW InformeTecnico AS(
+										SELECT t.id, name, surname, iban, company_name
+                                        FROM transaction t
+                                        INNER JOIN user u ON u.id = user_id 
+                                        INNER JOIN credit_card cc ON cc.id = credit_card_id 
+                                        INNER JOIN company c ON c.id = t.company_id
+                                        );
+SELECT * FROM InformeTecnico ORDER BY id DESC; 
