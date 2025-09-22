@@ -106,10 +106,13 @@ SELECT * from european_users;
 SELECT * from transactions;
 
 
--- transaccions
-
 -- Exercici 1
 -- Realitza una subconsulta que mostri tots els usuaris amb més de 80 transaccions utilitzant almenys 2 taules.
+
+SELECT u.id, count(u.id) num_tx FROM european_users u
+JOIN transactions t ON user_id = u.id 
+GROUP BY u.id 
+HAVING count(*) > 80;
 
 
 -- Exercici 2
