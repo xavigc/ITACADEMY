@@ -1,5 +1,5 @@
 -- ****************** Nivell 1 **************************
-USE transacrions;
+USE transactions;
 -- Exercici 1
 -- La teva tasca és dissenyar i crear una taula anomenada "credit_card" que emmagatzemi detalls crucials sobre les targetes de crèdit. 
 -- La nova taula ha de ser capaç d'identificar de manera única cada targeta i establir una relació adequada amb les altres dues taules ("transaction" i "company").
@@ -38,8 +38,16 @@ SELECT id,iban FROM credit_card WHERE id='CcU-2938';-- 'TR3234563122135768176999
 -- amount	111.11
 -- declined	0
 
-INSERT INTO transaction (id, credit_card_id, company_id, user_id, lat, longitude, timestamp, amount, declined) VALUES ('108B1D1D-5B23-A76C-55EF-C568E49A99DD', 'CcU-9999', 'b-9999', '9999', '829.999', '-117.999', timestamp, '111.11', '0');
--- Da error ya que no existe la companyia 'b-9999' y hay una foreig KEY a la tabla de conpany
+-- Da error ya que no existe la companyia 'b-9999' y hay una foreig KEY a la tabla de conpany, y a users.Los damos de alta primero.
+
+INSERT INTO company (id, company_name, phone, email, country, website) 
+VALUES ('b-9999', 'Ac Exrecici3', NULL, NULL, NULL, NULL);
+
+INSERT INTO user (id, name, surname, phone, email, birth_date, country, city, postal_code, address) 
+VALUES ("9999", "Exrecici3", "Exrecici3", NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO transaction (id, credit_card_id, company_id, user_id, lat, longitude, timestamp, amount, declined) 
+VALUES ('108B1D1D-5B23-A76C-55EF-C568E49A99DD', 'CcU-9999', 'b-9999', '9999', '829.999', '-117.999', timestamp, '111.11', '0');
 
 -- Exercici 4
 -- Des de recursos humans et sol·liciten eliminar la columna "pan" de la taula credit_card. Recorda mostrar el canvi realitzat.
