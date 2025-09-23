@@ -114,12 +114,50 @@ JOIN transactions t ON user_id = u.id
 GROUP BY u.id 
 HAVING count(*) > 80;
 
-
 -- Exercici 2
 -- Mostra la mitjana d'amount per IBAN de les targetes de crèdit a la companyia Donec Ltd, utilitza almenys 2 taules.
 
+SELECT iban,AVG(amount),count(*) FROM transactions t 
+JOIN credit_cards cc ON cc.id = card_id
+JOIN companies c ON  c.id = t.business_id AND name = 'Donec Ltd'
+GROUP BY iban; 
+
 -- ****************** Nivell 2 **************************
 -- Crea una nova taula que reflecteixi l'estat de les targetes de crèdit basat en si les últimes tres transaccions van ser declinades i genera la següent consulta:
+
+SELECT card_id, SUM(amount) OVER (PARTITION BY card_id ORDER BY date_tx DESC) AS last
+from transactions;
+
+SELECT TOP 3  from(
+							SELECT card_id, date_tx, declined--  MAX(date_TX),  MIN(date_TX) 
+							from transactions
+							order by card_id,date_tx desc
+                            ) a
+-- where declined= 1
+group by card_id,date_tx, declined;
+
+					SELECT card_id, date_tx, declined--  MAX(date_TX),  MIN(date_TX) 
+							from transactions
+							order by card_id,date_tx desc;
+
+SELECT * from (
+				WITH ultims AS ( 
+								SELECT card_id, date_tx, declined , 
+									   ROW_NUMBER() OVER(PARTITION BY card_id ORDER BY date_tx DESC) AS rank_numero 
+								FROM transactions ) 
+				SELECT * FROM ultims WHERE rank_numero < 4
+			   ) as  last_3tx
+WHERE declined =1
+order by card_id,rank_numero;
+
+
+select card_id, MAX(date_tx) OVER (PARTITION BY card_id ORDER BY date_tx DESC) AS last from transactions;
+					
+LIMIT 3;
+-- group by card_id
+-- order by card_id;
+
+ORDER BY;
 
 -- Exercici 1
 -- Quantes targetes estan actives?
