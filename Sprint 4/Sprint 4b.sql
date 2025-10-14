@@ -152,25 +152,32 @@ SELECT COUNT(*) FROM estat_credit_cards WHERE estat=1;
 -- Crea una taula amb la qual puguem unir les dades del nou arxiu products.csv amb la base de dades creada, tenint en compte que des de transaction tens product_ids. 
 
     -- Creamos la tabla products
+	DROP TABLE products;
     CREATE TABLE IF NOT EXISTS products (
-        id 				VARCHAR(255) PRIMARY KEY,
+        id 				VARCHAR(255) PRIMARY KEY REFERENCES transactions(product_id),
         product_name 	VARCHAR(255),
-        price 			VARCHAR(15),
+        price 			VARCHAR(255),
         colour 			VARCHAR(50),
         weight 			VARCHAR(50),
         warehouse_id 	VARCHAR(255)
-    ); -- id	product_name	price	colour	weight	warehouse_id
+        ); -- id	product_name	price	colour	weight	warehouse_id
 
 
-LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/products.csv" INTO TABLE transactions
-FIELDS TERMINATED BY ';'
+LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/products.csv" INTO TABLE products
+FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 LINES
-(`id`, `card_id`, `business_id`, `date_tx`, `amount`, `declined`, `product_ids`, `user_id`, `lat`, `longitude`)
-; 
+(`id`,`product_name`,`price`,`colour`,`weight`,`warehouse_id`)
+;
 
 -- Genera la següent consulta:
 
 -- Exercici 1
 -- Necessitem conèixer el nombre de vegades que s'ha venut cada producte.
+
+SELECT p.product_name,count(*) unitats_venudes FROM transactions
+INNER JOIN products p ON CONCAT(',',product_ids,',') like CONCAT('%,', p.id ,',%')
+GROUP BY p.id
+ORDER BY unitats_venudes DESC; 
+
