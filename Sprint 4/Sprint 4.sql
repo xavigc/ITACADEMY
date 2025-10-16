@@ -14,7 +14,7 @@
 
     -- Creamos las tablas 
 	
-    CREATE TABLE IF NOT EXISTS european_users (
+    CREATE TABLE IF NOT EXISTS users (
         id 			VARCHAR(255) PRIMARY KEY,
 		name 		VARCHAR(100),
 		surname 	VARCHAR(100),
@@ -59,16 +59,26 @@
 		amount 		DECIMAL(10, 2),
         declined 	BOOLEAN,
         product_ids VARCHAR(255) ,
-		user_id 	VARCHAR(255)  REFERENCES european_users(id),
+		user_id 	VARCHAR(255) ,
         lat 		VARCHAR(255),
         longitude 	VARCHAR(255),
         FOREIGN KEY (card_id) 		REFERENCES credit_cards(id),
-        FOREIGN KEY (business_id) 	REFERENCES companies(id)  
+        FOREIGN KEY (business_id) 	REFERENCES companies(id),
+        FOREIGN KEY (user_id) 		REFERENCES users(id)  
     );
 
 SHOW VARIABLES LIKE "secure_file_priv";
 SELECT @@GLOBAL.secure_file_priv;
-LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/european_users.csv" INTO TABLE european_users
+LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/european_users.csv" INTO TABLE users
+FIELDS TERMINATED BY ','
+ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(id, name, surname, phone, email, birth_date, country, city, postal_code, address)
+-- SET birth_date = DATE_FORMAT(@birth_date, '%b %d, %Y')
+; 
+
+LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/american_users.csv" INTO TABLE users
 FIELDS TERMINATED BY ','
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
@@ -100,8 +110,6 @@ IGNORE 1 LINES
 (`id`, `card_id`, `business_id`, `date_tx`, `amount`, `declined`, `product_ids`, `user_id`, `lat`, `longitude`)
 ; 
 
-
-
 -- Exercici 1
 -- Realitza una subconsulta que mostri tots els usuaris amb més de 80 transaccions utilitzant almenys 2 taules.
 
@@ -109,6 +117,14 @@ SELECT u.id, count(u.id) num_tx FROM european_users u
 JOIN transactions t ON user_id = u.id 
 GROUP BY u.id 
 HAVING count(*) > 80;
+
+SELECT id FROM european_users 
+WHERE id IN(
+				SELECT user_id FROM transactions
+				GROUP BY user_id
+				HAVING count(*) >80
+);
+
 
 -- Exercici 2
 -- Mostra la mitjana d'amount per IBAN de les targetes de crèdit a la companyia Donec Ltd, utilitza almenys 2 taules.
@@ -122,7 +138,7 @@ GROUP BY iban;
 -- Crea una nova taula que reflecteixi l'estat de les targetes de crèdit basat en si les tres últimes transaccions han estat declinades aleshores és inactiu, 
 -- si almenys una no és rebutjada aleshores és actiu. 
 
-  -- DROP TABLE estat_credit_cards;
+    -- DROP TABLE estat_credit_cards;
    CREATE TABLE IF NOT EXISTS estat_credit_cards 
 	WITH ultims AS ( 
 					SELECT card_id, date_tx, declined , 
@@ -131,14 +147,13 @@ GROUP BY iban;
 					WHERE declined=1
 					order by card_id,rank_numero
 					) 
-	SELECT card_id , 0 AS estat FROM ultims ul WHERE EXISTS (SELECT card_id WHERE rank_numero =3 AND card_id = ul.card_id) 
+	SELECT card_id , 0 AS estat FROM ultims ul WHERE EXISTS (SELECT card_id WHERE rank_numero =3 AND card_id = ul.card_id)
 	UNION
 	SELECT DISTINCT(card_id), 1 AS estat FROM transactions WHERE card_id NOT IN ( SELECT card_id FROM ultims ul WHERE EXISTS (SELECT card_id WHERE rank_numero =3 AND card_id = ul.card_id) )
 	;
 
 -- Exercici 1
 -- Quantes targetes estan actives?
-
 SELECT COUNT(*) FROM estat_credit_cards WHERE estat=1;
 
 -- ****************** Nivell 3 **************************
@@ -169,8 +184,10 @@ IGNORE 1 LINES
 -- Exercici 1
 -- Necessitem conèixer el nombre de vegades que s'ha venut cada producte.
 
-SELECT p.product_name,count(*) unitats_venudes FROM transactions
-INNER JOIN products p ON CONCAT(',',product_ids,',') like CONCAT('%,', p.id ,',%')
+SELECT p.id,count(*) unitats_venudes FROM transactions
+INNER JOIN products p ON CONCAT(', ',product_ids,',') like CONCAT('%, ', p.id ,',%')
 GROUP BY p.id
 ORDER BY unitats_venudes DESC; 
+
+-- 253391(Total registres)
 
