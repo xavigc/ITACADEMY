@@ -138,19 +138,17 @@ GROUP BY iban;
 -- Crea una nova taula que reflecteixi l'estat de les targetes de crèdit basat en si les tres últimes transaccions han estat declinades aleshores és inactiu, 
 -- si almenys una no és rebutjada aleshores és actiu. 
 
-    -- DROP TABLE estat_credit_cards;
-   CREATE TABLE IF NOT EXISTS estat_credit_cards 
-	WITH ultims AS ( 
-					SELECT card_id, date_tx, declined , 
-						   ROW_NUMBER() OVER(PARTITION BY card_id ORDER BY date_tx DESC) AS rank_numero 
-					FROM transactions
-					WHERE declined=1
-					order by card_id,rank_numero
-					) 
-	SELECT card_id , 0 AS estat FROM ultims ul WHERE EXISTS (SELECT card_id WHERE rank_numero =3 AND card_id = ul.card_id)
-	UNION
-	SELECT DISTINCT(card_id), 1 AS estat FROM transactions WHERE card_id NOT IN ( SELECT card_id FROM ultims ul WHERE EXISTS (SELECT card_id WHERE rank_numero =3 AND card_id = ul.card_id) )
-	;
+	-- DROP TABLE estat_credit_cards;
+    CREATE TABLE IF NOT EXISTS estat_credit_cards 
+    SELECT card_id, IF(sum(declined)=3,1,0) AS inactiu 
+		FROM
+			(SELECT card_id,declined,
+					   ROW_NUMBER() OVER(PARTITION BY card_id ORDER BY date_tx DESC) AS rank_numero
+			FROM transactions) rank_ultims
+	WHERE  rank_numero <=3
+	GROUP BY card_id;
+    
+    SELECT * from estat_credit_cards ORDER BY inactiu DESC;
 
 -- Exercici 1
 -- Quantes targetes estan actives?
