@@ -1,0 +1,153 @@
+11:21:46	LOAD DATA INFILE "C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/products.csv" INTO TABLE products FIELDS TERMINATED BY ';' ENCLOSED BY '"' LINES TERMINATED BY '\n' IGNORE 1 LINES (`id`,`product_name`,`price`,`colour`,`weight`,`warehouse_id`)	
+
+Error Code: 1261. Row 1 doesn't contain data for all columns	0.000 sec
+
+use Entretenimentcinematogràfic
+
+
+db["Cinema"].find()
+
+db["Cinema"].find(
+{
+  project: {
+    'awards.text': 1,
+    _id: 0
+  },
+  limit: 2
+})
+
+db["Cinema"].find(
+{
+  name: 'Andrea Le'
+})
+
+db["Cinema"].find(
+{
+  date: {
+    $gt: ISODate("2018-07-21T00:00:00.000Z")
+  }
+})
+
+db["Cinema"].find({
+  project: {
+    text: 1,
+    _id: 0
+  },
+  limit: 2
+}
+)
+
+db["Cinema"].find(
+{
+  sort: {
+    date: 1
+  },
+  project: {
+    text: 1,
+    _id: 0
+  }
+})
+
+db["Cinema"].find(
+{
+  project: {
+    text: 1,
+    _id: 0
+  }
+}
+)
+
+{
+  project: {
+    text: 1,
+    _id: 0
+  }
+}
+
+db.["Cinema"].find().sort( { "date": 1 } )
+
+SELECT text,date from Cinema LIMIT 2;
+
+db["Cinema"].find(
+{
+  project: {
+    text: 1,
+    date: 1
+  },
+  limit: 2
+}
+)
+
+{
+  project: {
+    text: 1,
+    date: 1
+  },
+  limit: 2
+}
+
+db["Cinema"].find()
+db["Cinema"].ORDER BY date.find({
+
+db["Cinema"].find().sort( 
+{ 
+"date": 1 
+} 
+)
+
+
+SELECT count(DISTINCT name) from Cinemas;
+SELECT * from Cinema where state ="CA"
+
+
+db.Cinema.aggregate([
+  { $match: { "location.address.state": "DC" } },
+  { $group: {
+      _id: "$location.address.zipcode",
+      countstar: { $sum: 1 }
+  }}
+])
+
+db.Cinema
+{
+  filter: {
+    directors: 'John Landis',
+    'imdb.rating': {
+      $gte: 7.5,
+      $lte: 8
+    }
+  }
+}
+
+db.Cinema.find({
+  directors: 'John Landis',
+  'imdb.rating': { $gte: 7.5, $lte: 8 }
+})
+
+
+{
+  filter: {
+
+}
+db.Cinema.find(
+  { theaterId: { $ne: null } },              // filtro
+  { 'location.geo.location': 1, _id: 0 }     // proyección
+)
+
+db.Cinema.updateMany(
+  {
+    "location.geo.location": { $exists: true },
+    theaterId: { $ne: null }
+  },
+  [
+    { $set: {
+        location: {
+          type: "Point",
+          coordinates: "$location.geo.location"
+        }
+      }
+    }
+  ]
+)
+
+db.Cinema.createIndex({ location: "2dsphere" })
